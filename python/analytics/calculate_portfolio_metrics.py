@@ -102,9 +102,6 @@ def save_output(portfolio, file_path):
 
 def main():
 
-    print("=" * 60)
-    print("Stage 9.4 - Portfolio Risk Analytics")
-    print("=" * 60)
 
     df = load_data(INPUT_FILE_PATH)
 
@@ -118,7 +115,6 @@ def main():
 
     save_output(portfolio, OUTPUT_FILE_PATH)
 
-    print("\nStage 9.4 completed successfully.")
 
 
 if __name__ == "__main__":

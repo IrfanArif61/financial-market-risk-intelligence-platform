@@ -129,9 +129,7 @@ def save_output(df: pd.DataFrame, file_path: str):
 
 
 def main():
-    print("=" * 60)
-    print("Stage 9.1 - Daily Returns and Cumulative Returns")
-    print("=" * 60)
+
 
     df = load_cleaned_data(INPUT_FILE_PATH)
     df = prepare_data(df)
@@ -140,7 +138,6 @@ def main():
     validate_returns(df)
     save_output(df, OUTPUT_FILE_PATH)
 
-    print("\nStage 9.1 completed successfully.")
 
 
 if __name__ == "__main__":

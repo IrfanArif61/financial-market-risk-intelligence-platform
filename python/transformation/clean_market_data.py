@@ -105,7 +105,7 @@ def clean_market_data(df: pd.DataFrame) -> pd.DataFrame:
     # Add row number per asset (helps debugging / analytics later)
     df["asset_row_num"] = df.groupby("ticker").cumcount() + 1
 
-    # Add previous close placeholder (will be used in Stage 9)
+    # Add previous close placeholder 
     df["previous_close_price"] = df.groupby("ticker")["close_price"].shift(1)
 
     # Add data quality flags
@@ -164,9 +164,7 @@ def save_cleaned_data(df: pd.DataFrame, output_path: str):
 
 
 def main():
-    print("=" * 60)
-    print("Stage 8 - Market Data Transformation Layer")
-    print("=" * 60)
+    
 
     engine = get_engine()
 
@@ -175,7 +173,6 @@ def main():
     validate_cleaned_data(cleaned_df)
     save_cleaned_data(cleaned_df, OUTPUT_FILE_PATH)
 
-    print("\nStage 8 completed successfully.")
 
 
 if __name__ == "__main__":

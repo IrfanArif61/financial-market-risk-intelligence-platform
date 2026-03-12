@@ -196,9 +196,7 @@ def save_outputs(df: pd.DataFrame, corr_df: pd.DataFrame):
 
 
 def main():
-    print("=" * 60)
-    print("Stage 9.5 - Advanced Risk Metrics")
-    print("=" * 60)
+
 
     df = load_data(INPUT_FILE_PATH)
     df = prepare_data(df)
@@ -210,7 +208,6 @@ def main():
     validate_advanced_metrics(df, corr_df)
     save_outputs(df, corr_df)
 
-    print("\nStage 9.5 completed successfully.")
 
 
 if __name__ == "__main__":

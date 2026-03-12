@@ -172,7 +172,6 @@ def main():
     load_to_postgres(df_prices, engine)
     validate_load(engine)
 
-    print("\nStage 7 completed successfully.")
 
 
 if __name__ == "__main__":

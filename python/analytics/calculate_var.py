@@ -105,9 +105,7 @@ def save_output(df: pd.DataFrame, file_path: str):
 
 def main():
 
-    print("=" * 60)
-    print("Stage 9.3 - Value at Risk (VaR)")
-    print("=" * 60)
+    
 
     df = load_volatility_data(INPUT_FILE_PATH)
     df = prepare_data(df)
@@ -118,7 +116,6 @@ def main():
 
     save_output(df, OUTPUT_FILE_PATH)
 
-    print("\nStage 9.3 completed successfully.")
 
 
 if __name__ == "__main__":

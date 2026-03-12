@@ -188,9 +188,7 @@ def validate_load(engine):
 
 
 def main():
-    print("=" * 60)
-    print("Stage 9.6 - Load Final Analytics Tables into SQL")
-    print("=" * 60)
+   
 
     engine = get_engine()
 
@@ -221,7 +219,6 @@ def main():
     # Validate
     validate_load(engine)
 
-    print("\nStage 9.6 completed successfully.")
 
 
 if __name__ == "__main__":
