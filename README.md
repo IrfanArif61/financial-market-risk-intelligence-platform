@@ -33,22 +33,22 @@ On paper this is a strong, "diversified" portfolio — an **equal-weight (16.67%
 ## Insights deep-dive
 
 ### 1. Returns vs risk-adjusted returns — they tell opposite stories
-![Executive overview](screenshots/Executive%20Overview.png)
+![Executive overview](screenshots/executive_overview.png)
 
 Bitcoin (+214%), gold (+181%) and Tesla (+118%) led raw cumulative returns. But ranked by **Sharpe ratio** (return per unit of risk), the order flips: **GLD 0.127 and ^GSPC 0.123 sit top**, while the headline winners languish — **ETH 0.026, TSLA 0.048, BTC 0.051**. On 30-day volatility, TSLA (3.6%) and ETH (3.3%) are the most violent, gold (1.0%) and the S&P (0.8%) the calmest. **Lesson:** a big return number says nothing about whether the ride was worth it.
 
 ### 2. Equal weight ≠ equal risk — crypto dominates the risk budget
-![Portfolio construction](screenshots/portfolio_construction.png)
+![Portfolio construction](screenshots/Portfolio%20Construction.png)
 
 The portfolio is allocated equally (16.67% per asset), but the **risk contribution** is anything but equal: **ETH 29.8%, BTC 25.1%, GLD 18.0%, TSLA 12.1%, AAPL 10.7%, ^GSPC 4.4%**. The two crypto positions supply **~55% of portfolio risk** off a third of the capital. The equal-weight portfolio *did* beat the S&P benchmark over the window — but an investor who thought they were "balanced" was in fact running a crypto-dominated risk profile. (The efficient-frontier view is an approximation across these 6 assets, used to demonstrate the risk/return trade-off, not to prescribe an optimal allocation.)
 
 ### 3. Diversification is weaker than it looks — gold is the only hedge
-![Risk analytics](screenshots/risk_analytics.png)
+![Risk analytics](screenshots/Risk%20Analytics.png)
 
 The correlation matrix is the most important chart in the project. **Everything is positively correlated, mostly strongly:** BTC–ETH **0.96**, ^GSPC–AAPL **0.95**, ^GSPC–TSLA **0.91**, AAPL–TSLA **0.85**. A basket where assets move together at 0.7–0.96 offers little protection when markets turn. **Gold is the standout exception** — its correlations to everything else sit at **0.52–0.63**, the lowest in the matrix, which is exactly why it also posts the shallowest drawdown (−13.9%). Portfolio VaR (95%) sat around −2% day-to-day but spiked toward −4.5% in the early-2025 stress window.
 
 ### 4. Drawdowns — where the "winners" actually hurt
-![Market analysis](screenshots/market_analysis.png)
+![Market analysis](screenshots/Market%20Analysis.png)
 
 The full per-asset picture makes the risk-vs-reward trade explicit:
 
@@ -93,4 +93,4 @@ Ethereum returned just 29% but put investors through a **−64% peak-to-trough**
 ---
 
 **Irfan Arif** — Data Analyst · MSc FinTech, BSc Computer Science
-[LinkedIn](https://linkedin.com/in/irfanarif7) · [GitHub](https://github.com/IrfanArif61)
+[LinkedIn](https://linkedin.com/in/irfanarif61) · [GitHub](https://github.com/IrfanArif61)
