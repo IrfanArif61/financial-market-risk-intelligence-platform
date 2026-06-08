@@ -33,7 +33,7 @@ On paper this is a strong, "diversified" portfolio — an **equal-weight (16.67%
 ## Insights deep-dive
 
 ### 1. Returns vs risk-adjusted returns — they tell opposite stories
-![Executive overview](screenshots/executive_overview.png)
+![Executive overview](screenshots/Executive%20Overview.png)
 
 Bitcoin (+214%), gold (+181%) and Tesla (+118%) led raw cumulative returns. But ranked by **Sharpe ratio** (return per unit of risk), the order flips: **GLD 0.127 and ^GSPC 0.123 sit top**, while the headline winners languish — **ETH 0.026, TSLA 0.048, BTC 0.051**. On 30-day volatility, TSLA (3.6%) and ETH (3.3%) are the most violent, gold (1.0%) and the S&P (0.8%) the calmest. **Lesson:** a big return number says nothing about whether the ride was worth it.
 
