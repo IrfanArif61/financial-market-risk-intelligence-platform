@@ -1,349 +1,96 @@
-# Financial Market Risk Intelligence Platform
+# Multi-Asset Portfolio Risk Analysis
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![Power BI](https://img.shields.io/badge/Power_BI-Dashboard-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
-![yfinance](https://img.shields.io/badge/yfinance-Market_Data-2962FF?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+> **Business question:** *If you held an equal slice of six very different assets — the S&P 500, Apple, Tesla, Bitcoin, Ethereum and gold — how much risk are you actually carrying, where does it come from, and which assets earned their risk?*
 
-An end-to-end financial analytics project built with **Python, PostgreSQL, and Power BI** to analyze portfolio risk, asset performance, and market conditions across **equities, crypto, commodities, and benchmark indices**.
-
-This project simulates how portfolio managers and risk analysts monitor:
-- Portfolio performance and cumulative returns
-- Rolling volatility and risk regimes
-- Value at Risk (VaR) at 95% confidence
-- Risk-adjusted performance (Sharpe ratio)
-- Drawdowns and maximum drawdown tracking
-- Cross-asset correlations
-- Portfolio construction and risk-return trade-offs
+Acting as a risk analyst, I built a monitoring platform over **~3 years of daily market data (Mar 2023 – Mar 2026) across 6 assets** spanning equities, crypto, an index and a commodity. The goal isn't to pick winners — it's to answer the question every risk desk asks: *is this portfolio as diversified as it looks, and is the risk going where we think it is?*
 
 ---
 
-## Project Overview
+## Executive summary
 
-The platform ingests historical market data from Yahoo Finance, stores it in a cloud PostgreSQL warehouse, transforms and analyzes it through a Python analytics engine, and delivers interactive dashboards through Power BI.
+On paper this is a strong, "diversified" portfolio — an **equal-weight (16.67% each)** mix that returned **44.6%** and beat the S&P 500 benchmark over the window. But three findings show the diversification is largely an illusion, and the risk is concentrated exactly where you'd least want it:
 
-### Key Capabilities
-- Multi-asset market data extraction pipeline (3 years of daily data)
-- SQL-based data warehouse with star schema (fact + dimension tables)
-- Python-based financial analytics engine (7 metric categories)
-- Semantic SQL views for clean BI consumption
-- 4-page Power BI dashboard for portfolio monitoring and market analysis
+- **Equal weight is not equal risk.** Every asset holds 16.67% of the capital, yet **Ethereum and Bitcoin alone contribute ~55% of total portfolio risk** (ETH 29.8%, BTC 25.1%). Two of the six assets, a third of the money, drive over half the volatility.
+- **The "diversification" barely diversifies.** Correlations across the basket run **0.52 to 0.96** — Bitcoin–Ethereum move together at **0.96**, the S&P–Apple at **0.95**, S&P–Tesla at **0.91**. In a real sell-off, five of the six assets would fall together. **Only gold sits apart** (correlations 0.52–0.63) — the one genuine hedge in the book.
+- **The headline-return winners were the risk-adjusted losers.** Bitcoin (+214%) and Tesla (+118%) topped the return table — but they also delivered the *worst* drawdowns (ETH −64%, TSLA −54%, BTC −50%) and weak Sharpe ratios. The quiet winners on a **risk-adjusted basis were gold and the S&P** (highest Sharpe, shallowest drawdowns).
 
----
-
-## Tech Stack
-
-| Layer | Technology | Purpose |
-|---|---|---|
-| **Data Extraction** | Python, yfinance | Automated market data ingestion |
-| **Data Storage** | PostgreSQL (Neon) | Cloud-hosted data warehouse |
-| **Analytics Engine** | Python, pandas, NumPy | Financial calculations and risk metrics |
-| **Visualization** | Power BI | Interactive dashboards and KPIs |
-| **Database Admin** | pgAdmin | Schema management and queries |
-| **Development** | VS Code | IDE and development environment |
+**The so-what:** the portfolio's risk is concentrated in crypto, and its only real diversifier is gold. Trimming crypto weight would cut portfolio volatility far more than the capital reduction implies — and on a risk-adjusted view, the "boring" assets did the real work.
 
 ---
 
-## Architecture
+## Northstar metrics (Mar 2023 – Mar 2026)
 
-![Architecture Diagram](screenshots/architecture-diagram.png)
-
-```
-Market Data APIs (Yahoo Finance)
-        ↓
-Python ETL Layer
-        ↓
-PostgreSQL Raw Layer
-  • dim_assets
-  • fact_market_prices
-        ↓
-Python Analytics Engine
-  • daily & cumulative returns
-  • rolling volatility (7d, 30d)
-  • Value at Risk (95%)
-  • Sharpe ratio
-  • drawdown & max drawdown
-  • rolling correlations
-  • portfolio metrics
-        ↓
-PostgreSQL Reporting Layer
-  • fact_risk_metrics
-  • fact_portfolio_metrics
-  • fact_rolling_correlations
-        ↓
-SQL Views / Semantic Layer
-  • v_asset_risk_metrics
-  • v_portfolio_risk_metrics
-  • v_asset_correlations
-  • v_latest_asset_risk_metrics
-        ↓
-Power BI Dashboard (4 pages)
-```
-
----
-
-## Data Model
-
-![Star Schema Data Model](screenshots/STAR-Schema%20Model.png)
-
-### Raw / Warehouse Layer
-
-| Table | Description |
+| Metric | Value |
 |---|---|
-| `dim_assets` | Dimension table with asset metadata (ticker, name, class, exchange, currency) |
-| `fact_market_prices` | Daily OHLCV price data with foreign key to dim_assets |
-
-### Reporting / Analytics Layer
-
-| Table | Description |
-|---|---|
-| `fact_risk_metrics` | Per-asset daily risk metrics (return, volatility, VaR, Sharpe, drawdown) |
-| `fact_portfolio_metrics` | Portfolio-level daily risk metrics |
-| `fact_rolling_correlations` | 30-day rolling correlations between all asset pairs |
-
-### Semantic / BI Layer (Views)
-
-| View | Description |
-|---|---|
-| `v_asset_risk_metrics` | Enriched asset risk view joined with dim_assets |
-| `v_portfolio_risk_metrics` | Clean portfolio metrics for BI |
-| `v_asset_correlations` | Correlation data for matrix visualization |
-| `v_latest_asset_risk_metrics` | Most recent risk snapshot per asset |
+| Portfolio return | 44.6% |
+| Portfolio volatility (30-day) | 2.25% |
+| Portfolio Value at Risk (95%) | −2.21% |
+| Average asset Sharpe | 0.07 |
+| Assets monitored | 6 (equity, crypto, index, commodity) |
 
 ---
 
-## Financial Metrics Implemented
+## Insights deep-dive
 
-### Asset-Level Metrics
+### 1. Returns vs risk-adjusted returns — they tell opposite stories
+![Executive overview](screenshots/executive_overview.png)
 
-| Metric | Window | Description |
-|---|---|---|
-| Daily Return | 1 day | Percentage change in close price |
-| Cumulative Return | Full period | Compounded total return since start |
-| Volatility (7D) | 7-day rolling | Short-term return standard deviation |
-| Volatility (30D) | 30-day rolling | Medium-term return standard deviation |
-| Value at Risk (95%) | 30-day rolling | 5th percentile of return distribution |
-| Sharpe Ratio | 30-day rolling | Risk-adjusted return (mean / std) |
-| Drawdown | Running | Peak-to-trough decline from running maximum |
-| Maximum Drawdown | Running | Worst drawdown observed to date |
-| Rolling Correlation | 30-day rolling | Pairwise correlation between all assets |
+Bitcoin (+214%), gold (+181%) and Tesla (+118%) led raw cumulative returns. But ranked by **Sharpe ratio** (return per unit of risk), the order flips: **GLD 0.127 and ^GSPC 0.123 sit top**, while the headline winners languish — **ETH 0.026, TSLA 0.048, BTC 0.051**. On 30-day volatility, TSLA (3.6%) and ETH (3.3%) are the most violent, gold (1.0%) and the S&P (0.8%) the calmest. **Lesson:** a big return number says nothing about whether the ride was worth it.
 
-### Portfolio-Level Metrics
+### 2. Equal weight ≠ equal risk — crypto dominates the risk budget
+![Portfolio construction](screenshots/portfolio_construction.png)
 
-| Metric | Description |
-|---|---|
-| Portfolio Return | Weighted sum of asset daily returns |
-| Portfolio Cumulative Return | Compounded portfolio return |
-| Portfolio Volatility (30D) | Rolling standard deviation of portfolio returns |
-| Portfolio VaR (95%) | 5th percentile of portfolio return distribution |
+The portfolio is allocated equally (16.67% per asset), but the **risk contribution** is anything but equal: **ETH 29.8%, BTC 25.1%, GLD 18.0%, TSLA 12.1%, AAPL 10.7%, ^GSPC 4.4%**. The two crypto positions supply **~55% of portfolio risk** off a third of the capital. The equal-weight portfolio *did* beat the S&P benchmark over the window — but an investor who thought they were "balanced" was in fact running a crypto-dominated risk profile. (The efficient-frontier view is an approximation across these 6 assets, used to demonstrate the risk/return trade-off, not to prescribe an optimal allocation.)
 
----
+### 3. Diversification is weaker than it looks — gold is the only hedge
+![Risk analytics](screenshots/risk_analytics.png)
 
-## Dashboard Pages
+The correlation matrix is the most important chart in the project. **Everything is positively correlated, mostly strongly:** BTC–ETH **0.96**, ^GSPC–AAPL **0.95**, ^GSPC–TSLA **0.91**, AAPL–TSLA **0.85**. A basket where assets move together at 0.7–0.96 offers little protection when markets turn. **Gold is the standout exception** — its correlations to everything else sit at **0.52–0.63**, the lowest in the matrix, which is exactly why it also posts the shallowest drawdown (−13.9%). Portfolio VaR (95%) sat around −2% day-to-day but spiked toward −4.5% in the early-2025 stress window.
 
-### 1. Executive Overview
+### 4. Drawdowns — where the "winners" actually hurt
+![Market analysis](screenshots/market_analysis.png)
 
-![Executive Overview Dashboard](screenshots/Executive%20Overview.png)
+The full per-asset picture makes the risk-vs-reward trade explicit:
 
-High-level portfolio monitoring page with:
-- Portfolio Return, Volatility, VaR, and Sharpe KPI cards
-- Cumulative Asset Returns time series (indexed to 100)
-- 30-Day Volatility by Asset bar chart
-- Risk-Adjusted Performance (Sharpe Ratio) ranking
+| Asset | Class | Return | 30D Volatility | VaR (95%) | Max Drawdown |
+|---|---|---|---|---|---|
+| BTC-USD | Crypto | +213.7% | 4.38% | −4.19% | **−49.7%** |
+| GLD | Commodity ETF | +180.9% | 3.14% | −4.26% | −13.9% |
+| TSLA | Equity | +118.0% | 2.11% | −3.29% | **−53.8%** |
+| ^GSPC | Index | +68.8% | 0.77% | −1.28% | −18.9% |
+| AAPL | Equity | +68.4% | 1.86% | −2.79% | −33.4% |
+| ETH-USD | Crypto | +29.0% | 5.21% | −5.51% | **−63.8%** |
 
-### 2. Risk Analytics
-
-![Risk Analytics Dashboard](screenshots/Risk%20Analytics.png)
-
-Portfolio and asset risk monitoring page with:
-- Portfolio Value at Risk (95%) trend line
-- Asset Volatility Trend (multi-line)
-- Asset Correlation Matrix (heatmap)
-- Asset Drawdown Analysis (multi-line)
-
-### 3. Portfolio Construction
-
-![Portfolio Construction Dashboard](screenshots/Portfolio%20Construction.png)
-
-Portfolio design and diversification analysis with:
-- Portfolio Allocation donut chart
-- Portfolio vs Market Benchmark (S&P 500) comparison
-- Risk Contribution by Asset (weighted bar chart)
-- Risk vs Return scatter (Efficient Frontier approximation)
-
-### 4. Market Analysis
-
-![Market Analysis Dashboard](screenshots/Market%20Analysis.png)
-
-Market regime, asset leadership, and diversification page with:
-- Relative Asset Performance (cumulative return comparison)
-- Rolling Correlation Trend
-- Volatility Regime (30-day rolling by asset)
-- Latest Market Snapshot table (returns, volatility, VaR, Sharpe, max drawdown)
-- Top / Bottom Performers bar chart
+Ethereum returned just 29% but put investors through a **−64% peak-to-trough** loss — the worst risk-for-reward in the book. Gold delivered a comparable headline return to the equity names with a fraction of the drawdown. This is the table that reframes "best performer" into "best *investment*."
 
 ---
 
-## Assets Analyzed
+## Recommendations (tied to the numbers)
 
-The project covers a diversified multi-asset universe:
-
-| Ticker | Asset | Class |
-|---|---|---|
-| `^GSPC` | S&P 500 Index | Benchmark Index |
-| `AAPL` | Apple Inc. | Equity |
-| `TSLA` | Tesla Inc. | Equity |
-| `BTC-USD` | Bitcoin | Cryptocurrency |
-| `ETH-USD` | Ethereum | Cryptocurrency |
-| `GLD` | SPDR Gold Shares | Commodity ETF |
+1. **Re-weight away from crypto if the goal is balance.** ETH + BTC contribute ~55% of risk from 33% of capital; cutting crypto weight reduces portfolio volatility disproportionately.
+2. **Treat gold as the portfolio's hedge, not just a return source.** Its 0.52–0.63 correlations and −13.9% max drawdown make it the only genuine diversifier in this basket.
+3. **Judge assets on Sharpe and drawdown, not headline return.** On that basis GLD and the S&P were the strongest holdings; ETH and TSLA the weakest despite TSLA's +118%.
+4. **Add a true diversifier.** Because everything here correlates at 0.5+, the book needs an asset with low/negative correlation (e.g. bonds, defensives) to materially cut tail risk.
 
 ---
 
-## Project Structure
+## How the analysis was built *(technical appendix)*
 
-![Project Structure](screenshots/Project-Structure.png)
+<details>
+<summary>Pipeline, metrics, and engineering detail (click to expand)</summary>
 
-```
-Financial Market Risk Intelligence Platform/
-│
-├── dashboard/                  # Power BI dashboard files
-├── data/
-│   ├── raw/                    # Extracted raw market data (CSV)
-│   └── processed/              # Transformed analytics-ready data (CSV)
-├── docs/
-│   └── data_dictionary.md      # Full table and column documentation
-├── notebooks/
-│   └── exploratory_analysis.ipynb
-├── python/
-│   ├── analytics/              # Financial analytics scripts
-│   │   ├── calculate_returns.py
-│   │   ├── calculate_volatility.py
-│   │   ├── calculate_var.py
-│   │   ├── calculate_portfolio_metrics.py
-│   │   └── calculate_advanced_metrics.py
-│   ├── database/               # DB connection and loading scripts
-│   │   ├── db_connection.py
-│   │   ├── load_to_postgres.py
-│   │   ├── load_reporting_tables.py
-│   │   └── test_connection.py
-│   ├── extraction/             # Data extraction scripts
-│   │   └── extract_market_data.py
-│   └── transformation/        # Cleaning and transformation scripts
-│       └── clean_market_data.py
-├── screenshots/                # Dashboard and architecture screenshots
-├── sql/                        # Schema, tables, views, inserts
-│   ├── create_schema.sql
-│   ├── create_tables.sql
-│   ├── create_reporting_tables.sql
-│   ├── create_views.sql
-│   └── insert_dim_assets.sql
-├── run_pipeline.py             # Single-command pipeline orchestrator
-├── README.md
-├── requirements.txt
-├── .env.example                # Environment variable template
-├── .gitignore
-└── LICENSE
-```
+**Stack:** Python → PostgreSQL → Power BI.
+
+- **Data:** ~3 years of daily prices for 6 assets pulled via the yfinance API (^GSPC, AAPL, TSLA, BTC-USD, ETH-USD, GLD), ~5,000 observations.
+- **Warehouse:** layered PostgreSQL design — raw (`dim_assets`, `fact_market_prices`) → Python analytics layer → reporting tables (`fact_risk_metrics`, `fact_portfolio_metrics`, `fact_rolling_correlations`) → semantic SQL views for BI.
+- **Metrics computed in Python:** daily & cumulative returns, 7/30-day rolling volatility, **Value at Risk (95%)**, rolling **Sharpe ratio**, drawdown & max drawdown, rolling pairwise **correlations**, and portfolio-level aggregates.
+- **Dashboard:** 4-page Power BI suite (Executive Overview, Risk Analytics, Portfolio Construction, Market Analysis).
+- **Code:** `/python` (extraction, transformation, analytics, database); **SQL:** `/sql`.
+
+**Scope & caveats:** this is a **risk-monitoring** project, not investment advice. The 6-asset basket is a fixed, illustrative, equal-weighted set on public data; the efficient-frontier page is an approximation demonstrating the method, not an optimised mandate. Returns are price-only (no dividends/fees) over a single ~3-year window, so figures are sensitive to the chosen period.
+</details>
 
 ---
 
-## How to Run
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/your-username/financial-market-risk-intelligence-platform.git
-cd "Financial Market Risk Intelligence Platform"
-```
-
-### 2. Create and Activate Virtual Environment
-
-```bash
-python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS/Linux
-```
-
-### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure Environment Variables
-
-Copy the example file and fill in your database credentials:
-
-```bash
-copy .env.example .env       # Windows
-# cp .env.example .env       # macOS/Linux
-```
-
-Then edit `.env` with your PostgreSQL connection details.
-
-### 5. Set Up the Database
-
-Run the SQL scripts in order using pgAdmin or any PostgreSQL client:
-
-1. `sql/create_schema.sql`
-2. `sql/create_tables.sql`
-3. `sql/insert_dim_assets.sql`
-4. `sql/create_reporting_tables.sql`
-5. `sql/create_views.sql`
-
-### 6. Run the Full Pipeline
-
-```bash
-python run_pipeline.py
-```
-
-Or run each stage individually:
-
-```bash
-python python/extraction/extract_market_data.py
-python python/database/load_to_postgres.py
-python python/transformation/clean_market_data.py
-python python/analytics/calculate_returns.py
-python python/analytics/calculate_volatility.py
-python python/analytics/calculate_var.py
-python python/analytics/calculate_portfolio_metrics.py
-python python/analytics/calculate_advanced_metrics.py
-python python/database/load_reporting_tables.py
-```
-
-### 7. Open the Power BI Dashboard
-
-Connect Power BI to the PostgreSQL semantic views and explore the 4 dashboard pages.
-
----
-
-## Key Outcomes
-
-- Built a **complete financial analytics pipeline** from API ingestion to BI reporting
-- Processed **5,000+ daily market observations** across 6 diversified assets
-- Implemented **9 professional risk metrics** used in institutional portfolio management
-- Designed a **4-page Power BI dashboard** with KPI cards, time series, heatmaps, and scatter plots
-- Applied a **layered data architecture**: raw warehouse → analytics engine → semantic views → BI
-
----
-
-## Future Improvements
-
-- Monte Carlo simulation for a smoother efficient frontier visualization
-- ML-based volatility forecasting (GARCH, LSTM)
-- Macroeconomic indicator integration and regime detection
-- Cloud deployment with automated daily data refresh
-- Stress testing and scenario analysis module
-
----
-
-## Author
-
-**Irfan Arif**
-MSc FinTech & Trading | BSCS
-Focused on financial analytics, data pipelines, and portfolio risk intelligence
-
----
-
-*Built as a portfolio project demonstrating end-to-end financial data engineering and analytics capabilities.*
+**Irfan Arif** — Data Analyst · MSc FinTech, BSc Computer Science
+[LinkedIn](https://linkedin.com/in/irfanarif7) · [GitHub](https://github.com/IrfanArif61)
